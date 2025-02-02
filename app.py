@@ -3,15 +3,16 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import shutil
 import time
-from gtts import gTTS
-import base64
 import os
+import base64
 import requests
+from gtts import gTTS
 
 app = Flask(__name__)
 
-# AnkiConnect URL
+# AnkiConnect API (Only works when running locally)
 ANKI_CONNECT_URL = "http://localhost:8765"
 
 # API Key (Optional for security)
@@ -22,10 +23,20 @@ def get_longman_data(word):
     try:
         print(f"🔍 Scraping data for word: {word}")
 
+        # Ensure Chrome is installed
+        chrome_path = shutil.which("google-chrome")
+        if chrome_path is None:
+            print("❌ Chrome is not installed.")
+            return "Not found", "Not found", "Error fetching data."
+
+        # Configure Selenium WebDriver
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless")  # Run in headless mode
+        options.binary_location = chrome_path  # Set Chrome binary path
+        options.add_argument("--headless")  # Headless mode (no UI)
+        options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         url = f"https://www.ldoceonline.com/dictionary/{word}"
@@ -91,7 +102,7 @@ def generate_audio(word):
         return None
 
 def add_card_to_anki(word, phonetic, part_of_speech, back_card, audio_data):
-    """Send the card data to Anki via AnkiConnect."""
+    """Send the card data to Anki via AnkiConnect (Only works locally)."""
     try:
         print(f"📩 Sending card to Anki for: {word}")
         payload = {
@@ -168,6 +179,5 @@ def add_word():
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 10000))  # Render uses dynamic port mapping
     app.run(host="0.0.0.0", port=port, debug=True)
