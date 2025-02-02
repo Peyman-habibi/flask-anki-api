@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-echo "📥 Installing Google Chrome..."
+echo "📥 Installing required dependencies..."
 
-# Download & install Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-apt install -y ./google-chrome-stable_current_amd64.deb
-rm google-chrome-stable_current_amd64.deb
+# Update package lists
+apt-get update -y
+
+# Install Chrome dependencies
+apt-get install -y wget unzip curl gnupg
+
+echo "📥 Downloading Google Chrome..."
+curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
+apt-get update -y
+apt-get install -y google-chrome-stable
 
 echo "✅ Google Chrome installed successfully."
