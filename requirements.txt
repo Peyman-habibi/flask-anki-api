@@ -1,0 +1,6 @@
+flask
+flask-cors
+requests
+selenium
+gtts
+webdriver-manager
